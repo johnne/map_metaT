@@ -1,0 +1,9 @@
+name: map_metaT
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10.4
+  - snakemake=7.3.2
+  - pandas=1.4.1
