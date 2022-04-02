@@ -19,11 +19,11 @@ rule align:
             n = ["1","2","3","rev.1","rev.2"], data=config["data_dir"])
     output:
         "results/{assembly}/{sample}.bam",
-    "results/{assembly}/{sample}.bam.bai",
+        "results/{assembly}/{sample}.bam.bai",
     log:
         "logs/{assembly}/{sample}.bt2.log"
     params:
-        index = lambda wildcards, output: f"{os.path.dirname(input.asm)}/final_contigs.fa",
+        index = lambda wildcards, input: f"{os.path.dirname(input.asm[0])}/final_contigs.fa",
         temp_bam = "$TMPDIR/{assembly}.{sample}.bam",
         outdir = lambda wildcards, output: os.path.dirname(output[0])
     conda: "envs/bowtie2.yml"
