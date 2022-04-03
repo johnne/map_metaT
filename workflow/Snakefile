@@ -15,8 +15,8 @@ rule align:
     input:
         fq1 = lambda wildcards: samples[wildcards.sample]["fq1"],
         fq2 = lambda wildcards: samples[wildcards.sample]["fq2"],
-        asm = expand("{data}/{{assembly}}/final_contigs.fa.{n}.bt2l",
-            n = ["1","2","3","rev.1","rev.2"], data=config["data_dir"])
+        asm = expand("{assembly_dir}/{{assembly}}/final_contigs.fa.{n}.bt2l",
+            n = ["1","2","3","rev.1","rev.2"], assembly_dir=config["assembly_dir"])
     output:
         "results/{assembly}/{sample}.bam",
     "results/{assembly}/{sample}.bam.bai",
