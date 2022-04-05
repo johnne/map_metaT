@@ -1,3 +1,8 @@
 sample_list: "samples.tsv"
 assembly_list: "assemblies.tsv"
-data_dir: "data"
+assembly_dir: "data/assembly"
+annotation_dir: "data/annotation"
+featurecounts:
+  settings: "-t CDS -g ID -M -Q 10 -B -p"
+bowtie2:
+  settings: "--very-sensitive"
