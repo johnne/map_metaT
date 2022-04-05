@@ -99,3 +99,20 @@ rule multiqc:
         echo {input} | tr ' ' '\n' > filelist
         multiqc --cl-config 'extra_fn_clean_exts: [".bt2.log"]' -n report.html -o {params.outdir} -f -l filelist > {log} 2>&1
         """
+
+rule rpkm:
+    """
+    Calculate RPKM for genes in an assembly
+    """
+    input:
+        "results/{assembly}/counts.tsv"
+    output:
+        "results/{assembly}/rpkm.tsv"
+    log:
+        "logs/{assembly}/rpkm.log"
+    params:
+        method = "RPKM"
+    conda:
+        "envs/edger.yml"
+    script:
+        "scripts/edger.R"
