@@ -10,8 +10,12 @@ rule all:
     input:
         expand("results/{assembly}/align/{sample}.{suff}",
             assembly = assemblies.keys(), sample = samples.keys(), suff = ["bam", "bam.bai"]),
-        expand("results/{assembly}/count/{sample}.{suff}", assembly
-           = assemblies.keys(),sample=samples.keys(),suff=["fc.tsv", "fc.tsv.summary"])
+        expand("results/{assembly}/count/{sample}.{suff}",
+            assembly = assemblies.keys(), sample=samples.keys(), suff=["fc.tsv", "fc.tsv.summary"]),
+        expand("results/{assembly}/counts.tsv",
+            assembly = assemblies.keys()),
+        expand("results/{assembly}/report.html",
+            assembly = assemblies.keys())
 
 rule align:
     input:
@@ -49,14 +53,14 @@ rule featurecount:
             annotation_dir = config["annotation_dir"]),
         bam = rules.align.output.bam
     output:
-        "results/{assembly}/count/{sample}.fc.tsv",
-        "results/{assembly}/count/{sample}.fc.tsv.summary"
+        tsv = "results/{assembly}/count/{sample}.fc.tsv",
+        summary = "results/{assembly}/count/{sample}.fc.tsv.summary"
     log:
         "logs/{assembly}/{sample}.fc.log"
     threads: 4
     params:
         tmpdir="$TMPDIR",
-        setting=config["featureCounts"]["settings"]
+        setting=config["featurecounts"]["settings"]
     resources:
         runtime=lambda wildcards, attempt: attempt**2*30
     conda:
@@ -64,8 +68,34 @@ rule featurecount:
     shell:
         """
         mkdir -p {params.tmpdir}
-        featureCounts {params.setting} -a {input.gff} -o {output[0]} \
+        featureCounts {params.setting} -a {input.gff} -o {output.tsv} \
             -T {threads} --tmpDir {params.tmpdir} {input.bam} > {log} 2>&1
         """
 
+rule clean_featurecount:
+    input:
+        tsv = expand("results/{{assembly}}/count/{sample}.fc.tsv",
+            sample = samples.keys())
+    output:
+        tsv = "results/{assembly}/counts.tsv"
+    script: "scripts/common.py"
 
+rule multiqc:
+    input:
+        bt = expand("logs/{{assembly}}/{sample}.bt2.log",
+            sample = samples.keys()),
+        fc = expand("results/{{assembly}}/count/{sample}.fc.tsv.summary",
+            sample = samples.keys())
+    output:
+        "results/{assembly}/report.html"
+    log:
+        "logs/{assembly}/multiqc.log"
+    params:
+        outdir = lambda wildcards, output: os.path.dirname(output[0])
+    conda: "envs/multiqc.yml"
+    shadow: "minimal"
+    shell:
+        """
+        echo {input} | tr ' ' '\n' > filelist
+        multiqc --cl-config 'extra_fn_clean_exts: [".bt2.log"]' -n report.html -o {params.outdir} -f -l filelist > {log} 2>&1
+        """
