@@ -8,8 +8,10 @@ include: "rules/common.smk"
 
 rule all:
     input:
-        expand("results/{assembly}/{sample}.{suff}",
-            assembly = assemblies.keys(), sample = samples.keys(), suff = ["bam", "bam.bai"])
+        expand("results/{assembly}/align/{sample}.{suff}",
+            assembly = assemblies.keys(), sample = samples.keys(), suff = ["bam", "bam.bai"]),
+        expand("results/{assembly}/count/{sample}.{suff}", assembly
+           = assemblies.keys(),sample=samples.keys(),suff=["fc.tsv", "fc.tsv.summary"])
 
 rule align:
     input:
@@ -18,22 +20,52 @@ rule align:
         asm = expand("{assembly_dir}/{{assembly}}/final_contigs.fa.{n}.bt2l",
             n = ["1","2","3","rev.1","rev.2"], assembly_dir=config["assembly_dir"])
     output:
-        "results/{assembly}/{sample}.bam",
-        "results/{assembly}/{sample}.bam.bai",
+        bam = "results/{assembly}/align/{sample}.bam",
+        bai = "results/{assembly}/align/{sample}.bam.bai",
     log:
         "logs/{assembly}/{sample}.bt2.log"
     params:
         index = lambda wildcards, input: f"{os.path.dirname(input.asm[0])}/final_contigs.fa",
         temp_bam = "$TMPDIR/{assembly}.{sample}.bam",
-        outdir = lambda wildcards, output: os.path.dirname(output[0])
+        outdir = lambda wildcards, output: os.path.dirname(output.bam),
+        setting = config["bowtie2"]["settings"]
     conda: "envs/bowtie2.yml"
     resources:
         runtime = lambda wildcards, attempt: attempt ** 2 * 60 * 10
     threads: 10
     shell:
         """
-        bowtie2 --very-sensitive -1 {input.fq1} -2 {input.fq2} -p {threads} -x {params.index} 2> {log} | \
+        bowtie2 {params.setting} -1 {input.fq1} -2 {input.fq2} -p {threads} -x {params.index} 2> {log} | \
             samtools view -bh - | samtools sort - -o {params.temp_bam}
         samtools index {params.temp_bam}
-        mv {params.temp_bam}* {params.outdir}
+        mv {params.temp_bam} {output.bam}
+        mv {params.temp_bam}.bai {output.bai}
         """
+
+
+rule featurecount:
+    input:
+        gff = expand("{annotation_dir}/{{assembly}}/final_contigs.gff",
+            annotation_dir = config["annotation_dir"]),
+        bam = rules.align.output.bam
+    output:
+        "results/{assembly}/count/{sample}.fc.tsv",
+        "results/{assembly}/count/{sample}.fc.tsv.summary"
+    log:
+        "logs/{assembly}/{sample}.fc.log"
+    threads: 4
+    params:
+        tmpdir="$TMPDIR",
+        setting=config["featureCounts"]["settings"]
+    resources:
+        runtime=lambda wildcards, attempt: attempt**2*30
+    conda:
+        "envs/featurecounts.yml"
+    shell:
+        """
+        mkdir -p {params.tmpdir}
+        featureCounts {params.setting} -a {input.gff} -o {output[0]} \
+            -T {threads} --tmpDir {params.tmpdir} {input.bam} > {log} 2>&1
+        """
+
+
