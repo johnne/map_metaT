@@ -36,8 +36,40 @@ def clean_featurecount(sm):
     dataf.to_csv(sm.output.tsv, sep="\t")
 
 
+def process_and_sum(q_df, annot_df):
+    # Merge annotations and abundance
+    # keep ORFs without annotation as "Unclassified"
+    annot_q_df = pd.merge(annot_df, q_df, left_index=True, right_index=True,
+                          how="right")
+    annot_q_df.fillna("Unclassified", inplace=True)
+    feature_cols = annot_df.columns
+    annot_q_sum = annot_q_df.groupby(list(feature_cols)).sum().reset_index()
+    annot_q_sum.set_index(feature_cols[0], inplace=True)
+    return annot_q_sum
+
+
+def sum_to_features(abundance, parsed):
+    parsed_df = pd.read_csv(parsed, index_col=0, sep="\t")
+    abundance_df = pd.read_csv(abundance, index_col=0, sep="\t")
+    abundance_df.drop("Length", axis=1, inplace=True, errors="ignore")
+    feature_sum = process_and_sum(abundance_df, parsed_df)
+    return feature_sum
+
+
+def count_features(sm):
+    """
+    Counts reads mapped to features such as KOs, PFAMs etc.
+
+    :param sm:
+    :return:
+    """
+    feature_sum = sum_to_features(sm.input.abund, sm.input.annot[0])
+    feature_sum.to_csv(sm.output[0], sep="\t")
+
+
 def main(sm):
-    toolbox = {"clean_featurecount": clean_featurecount}
+    toolbox = {"clean_featurecount": clean_featurecount,
+               "count_features": count_features}
     toolbox[sm.rule](sm)
 
 
