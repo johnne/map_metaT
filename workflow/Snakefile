@@ -116,3 +116,17 @@ rule rpkm:
         "envs/edger.yml"
     script:
         "scripts/edger.R"
+
+
+rule count_features:
+    """
+    Sums read counts for gene annotation features such as pfam, KOs etc.
+    """
+    input:
+        abund = "results/{assembly}/counts.tsv",
+        annot = expand("{annotation_dir}/{{assembly}}/{{db}}.parsed.tsv",
+            annotation_dir = config["annotation_dir"])
+    output:
+        "results/{assembly}/{db}.parsed.counts.tsv"
+    script:
+        "scripts/common.py"
