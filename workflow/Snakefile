@@ -6,6 +6,8 @@
 configfile: "config/config.yml"
 include: "rules/common.smk"
 
+localrules: clean_featurecount, multiqc
+
 rule all:
     input:
         expand("results/{assembly}/align/{sample}.{suff}",
