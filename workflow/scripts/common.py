@@ -23,11 +23,16 @@ def clean_featurecount(sm):
     dataf = pd.DataFrame()
     for f in sm.input.tsv:
         sample = os.path.basename(f).replace(".fc.tsv", "")
-        df = pd.read_csv(f, sep="\t", comment="#", usecols=[0, 1, 6])
-        df.columns = ["Geneid", "Chr", sample]
+        df = pd.read_csv(f, sep="\t", comment="#", usecols=[0, 1, 5, 6])
+        df.columns = ["Geneid", "Chr", "Length", sample]
         df.index = df.Chr.map(str) + ["_" + x.split("_")[-1] for x in df.Geneid]
         df.drop(["Geneid","Chr"], axis=1, inplace=True)
         dataf = pd.merge(dataf, df, left_index=True, right_index=True, how="outer")
+        try:
+            dataf.drop("Length_y", axis=1, inplace=True)
+        except KeyError:
+            continue
+        dataf.rename(columns={"Length_x": "Length"}, inplace=True)
     dataf.to_csv(sm.output.tsv, sep="\t")
 
 
