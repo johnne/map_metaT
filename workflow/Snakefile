@@ -6,6 +6,8 @@
 configfile: "config/config.yml"
 include: "rules/common.smk"
 
+localrules: clean_featurecount, multiqc
+
 rule all:
     input:
         expand("results/{assembly}/align/{sample}.{suff}",
@@ -24,8 +26,8 @@ rule align:
         asm = expand("{assembly_dir}/{{assembly}}/final_contigs.fa.{n}.bt2l",
             n = ["1","2","3","rev.1","rev.2"], assembly_dir=config["assembly_dir"])
     output:
-        bam = "results/{assembly}/align/{sample}.bam",
-        bai = "results/{assembly}/align/{sample}.bam.bai",
+        bam = temp("results/{assembly}/align/{sample}.bam"),
+        bai = temp("results/{assembly}/align/{sample}.bam.bai"),
     log:
         "logs/{assembly}/{sample}.bt2.log"
     params:
@@ -78,6 +80,7 @@ rule clean_featurecount:
             sample = samples.keys())
     output:
         tsv = "results/{assembly}/counts.tsv"
+    priority: 50
     script: "scripts/common.py"
 
 rule multiqc:
