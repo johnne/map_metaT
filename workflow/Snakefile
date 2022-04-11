@@ -80,6 +80,7 @@ rule clean_featurecount:
             sample = samples.keys())
     output:
         tsv = "results/{assembly}/counts.tsv"
+    priority: 50
     script: "scripts/common.py"
 
 rule multiqc:
