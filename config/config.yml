@@ -6,3 +6,14 @@ featurecounts:
   settings: "-t CDS -g ID -M -Q 10 -B -p"
 bowtie2:
   settings: "--very-sensitive"
+annotation_dbs:
+  - "pfam"
+  - "protein-models"
+  - "enzymes"
+  - "kos"
+  - "modules"
+  - "pathways"
+norm_methods:
+  - "CSS"
+  - "TMM"
+  - "RLE"
