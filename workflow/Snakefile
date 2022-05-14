@@ -16,8 +16,8 @@ rule all:
             assembly = assemblies.keys(), sample=samples.keys(), suff=["fc.tsv", "fc.tsv.summary"]),
         expand("results/{assembly}/counts.tsv",
             assembly = assemblies.keys()),
-        expand("results/{assembly}/report.html",
-            assembly = assemblies.keys())
+        expand("results/{assembly}/{db}.parsed.{norm}.tsv",
+            assembly=assemblies.keys(), db=config["annotation_dbs"], norm = config["norm_methods"])
 
 rule align:
     input:
