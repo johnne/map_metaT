@@ -6,7 +6,12 @@
 configfile: "config/config.yml"
 include: "rules/common.smk"
 
-localrules: clean_featurecount, multiqc
+localrules:
+    clean_featurecount,
+    multiqc,
+    count_features,
+    css_normalize_features,
+    edger_normalize_features
 
 rule all:
     input:
