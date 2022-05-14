@@ -133,3 +133,35 @@ rule count_features:
         "results/{assembly}/{db}.parsed.counts.tsv"
     script:
         "scripts/common.py"
+
+rule edger_normalize_features:
+    """
+    Normalizes counts of features using TMM and REL
+    """
+    input:
+        counts = rules.count_features.output[0]
+    output:
+        "results/{assembly}/{db}.parsed.{norm_method}.tsv"
+    log:
+        "logs/{assembly}/{db}.{norm_method}.log"
+    params:
+        method = "{norm_method}"
+    conda:
+        "envs/edger.yml"
+    script:
+        "scripts/edger.R"
+
+rule css_normalize_features:
+    """
+    Normalizes counts of features using CSS from metagenomeSeq
+    """
+    input:
+        counts = rules.count_features.output[0]
+    output:
+        "results/{assembly}/{db}.parsed.CSS.tsv"
+    log:
+        "logs/{assembly}/{db}.CSS.log"
+    conda:
+        "envs/metagenomeseq.yml"
+    script:
+        "scripts/metagenomeseq.R"
