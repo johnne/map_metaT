@@ -11,6 +11,7 @@ localrules:
     multiqc,
     count_features,
     css_normalize_features,
+    rpkm,
     edger_normalize_features
 
 rule all:
