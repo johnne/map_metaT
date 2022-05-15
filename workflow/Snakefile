@@ -15,8 +15,6 @@ localrules:
 
 rule all:
     input:
-        expand("results/{assembly}/align/{sample}.{suff}",
-            assembly = assemblies.keys(), sample = samples.keys(), suff = ["bam", "bam.bai"]),
         expand("results/{assembly}/count/{sample}.{suff}",
             assembly = assemblies.keys(), sample=samples.keys(), suff=["fc.tsv", "fc.tsv.summary"]),
         expand("results/{assembly}/counts.tsv",
