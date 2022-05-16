@@ -23,6 +23,28 @@ rule all:
         expand("results/{assembly}/{db}.parsed.{norm}.tsv",
             assembly=assemblies.keys(), db=config["annotation_dbs"], norm = config["norm_methods"])
 
+rule bowtie_build:
+    input:
+        expand("{assembly_dir}/{{assembly}}/final_contigs.fa",
+            assembly_dir=config["assembly_dir"])
+    output:
+        expand("{assembly_dir}/{{assembly}}/final_contigs.fa.{index}.bt2l",
+            assembly_dir=config["assembly_dir"], index=list(range(1,5))+["rev.1", "rev.2"])
+    params: prefix=f"{config['assembly_dir']}/"+"{assembly}/final_contigs.fa"
+    threads: config["bowtie2"]["threads"]
+    resources:
+        runtime=lambda wildcards, attempt: attempt**2*60*4
+    conda:
+        "envs/bowtie2.yml"
+    shell:
+        """
+        bowtie2-build \
+            --large-index \
+            --threads {threads} \
+            {params.prefix} \
+            {params.prefix} > /dev/null 2>&1
+        """
+
 rule align:
     input:
         fq1 = lambda wildcards: samples[wildcards.sample]["fq1"],
@@ -42,7 +64,7 @@ rule align:
     conda: "envs/bowtie2.yml"
     resources:
         runtime = lambda wildcards, attempt: attempt ** 2 * 60 * 10
-    threads: 10
+    threads: config["bowtie2"]["threads"]
     shell:
         """
         bowtie2 {params.setting} -1 {input.fq1} -2 {input.fq2} -p {threads} -x {params.index} 2> {log} | \
