@@ -6,6 +6,7 @@ featurecounts:
   settings: "-t CDS -g ID -M -Q 10 -B -p"
 bowtie2:
   settings: "--very-sensitive"
+  threads: 10
 annotation_dbs:
   - "pfam"
   - "protein-models"
