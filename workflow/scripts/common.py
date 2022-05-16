@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from collections import defaultdict
 
 
@@ -12,9 +13,13 @@ def parse_samples(f):
     return samples
 
 
-def parse_assemblies(f, datadir="data/"):
-    df = pd.read_csv(f, sep="\t", index_col=0)
-    assemblies = df.to_dict(orient="index")
+def parse_assemblies(f, assembly_dir):
+    df = pd.read_csv(f, sep="\t", index_col=0, header=None)
+    d = df.to_dict(orient="index")
+    assemblies = {}
+    for assembly in d.keys():
+        if os.path.exists(f"{assembly_dir}/{assembly}/final_contigs.fa"):
+            assemblies[assembly] = ""
     return assemblies
 
 
