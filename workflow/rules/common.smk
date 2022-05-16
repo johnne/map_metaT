@@ -3,4 +3,4 @@ wildcard_constraints:
     counts_type="(counts|rpkm)",
     norm_method="(TMM|RLE)"
 samples = parse_samples(config["sample_list"])
-assemblies = parse_assemblies(config["assembly_list"])
+assemblies = parse_assemblies(config["assembly_list"], config["assembly_dir"])
