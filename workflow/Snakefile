@@ -22,7 +22,9 @@ rule all:
         expand("results/{assembly}/counts.tsv",
             assembly = assemblies.keys()),
         expand("results/{assembly}/{db}.parsed.{norm}.tsv",
-            assembly=assemblies.keys(), db=config["annotation_dbs"], norm = config["norm_methods"])
+            assembly=assemblies.keys(), db=config["annotation_dbs"], norm = config["norm_methods"]),
+        expand("tables/{db}.parsed.{norm}.tsv",
+            db=config["annotation_dbs"], norm = config["norm_methods"])
 
 rule zip:
     input:
@@ -120,6 +122,17 @@ rule clean_featurecount:
     priority: 50
     script: "scripts/common.py"
 
+rule extract_counts:
+    input:
+        expand("results/{assembly}/{{db}}.parsed.counts.tsv",
+            assembly = assemblies.keys())
+    output:
+        "tables/{db}.parsed.counts.tsv"
+    params:
+        sample_list = config["sample_list"]
+    script:
+        "scripts/common.py"
+
 rule multiqc:
     input:
         bt = expand("logs/{{assembly}}/{sample}.bt2.log",
@@ -176,11 +189,11 @@ rule edger_normalize_features:
     Normalizes counts of features using TMM and REL
     """
     input:
-        counts = rules.count_features.output[0]
+        counts = "{dir}/{db}.parsed.counts.tsv"
     output:
-        "results/{assembly}/{db}.parsed.{norm_method}.tsv"
+        "{dir}/{db}.parsed.{norm_method}.tsv"
     log:
-        "logs/{assembly}/{db}.{norm_method}.log"
+        "{dir}/logs/{db}.{norm_method}.log"
     params:
         method = "{norm_method}"
     conda:
@@ -193,11 +206,11 @@ rule css_normalize_features:
     Normalizes counts of features using CSS from metagenomeSeq
     """
     input:
-        counts = rules.count_features.output[0]
+        counts = "{dir}/{db}.parsed.counts.tsv"
     output:
-        "results/{assembly}/{db}.parsed.CSS.tsv"
+        "{dir}/{db}.parsed.CSS.tsv"
     log:
-        "logs/{assembly}/{db}.CSS.log"
+        "{dir}/logs/{db}.CSS.log"
     conda:
         "envs/metagenomeseq.yml"
     script:

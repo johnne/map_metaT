@@ -78,9 +78,44 @@ def count_features(sm):
     feature_sum.to_csv(sm.output[0], sep="\t")
 
 
+def get_sample_counts(samples, db):
+    """
+    Sub-function for iterating each sample and looking up the corresponding
+    count from its assembly
+
+    :param samples:
+    :param db:
+    :return:
+    """
+    d = {}
+    for sample in samples.keys():
+        assembly = samples[sample]["assembly"]
+        f = f"results/{assembly}/{db}.parsed.counts.tsv"
+        df = pd.read_csv(f, sep="\t", index_col=0)
+        d[sample] = df.loc[:, sample]
+    return d
+
+
+def extract_counts(sm):
+    """
+    This function extracts counts of features for each sample from its
+    corresponding single-sample assembly.
+
+    :param sm:
+    :return:
+    """
+    samples = parse_samples(sm.params.sample_list)
+    db = sm.wildcards.db
+    d = get_sample_counts(samples, db)
+    df = pd.DataFrame(d)
+    df.fillna(0, inplace=True)
+    df.to_csv(sm.output[0], sep="\t")
+
+
 def main(sm):
     toolbox = {"clean_featurecount": clean_featurecount,
-               "count_features": count_features}
+               "count_features": count_features,
+               "extract_counts": extract_counts}
     toolbox[sm.rule](sm)
 
 
