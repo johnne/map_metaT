@@ -10,6 +10,12 @@ def parse_samples(f):
         sample_id = f"{sample}_{d['unit']}"
         samples[sample_id]["fq1"] = d["fq1"]
         samples[sample_id]["fq2"] = d["fq2"]
+        # If no assembly is set in the samples file, assign assembly
+        # using sample
+        try:
+            samples[sample_id]["assembly"] = d["assembly"]
+        except KeyError:
+            samples[sample_id]["assembly"] = sample
     return samples
 
 
