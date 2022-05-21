@@ -12,6 +12,7 @@ localrules:
     count_features,
     css_normalize_features,
     rpkm,
+    zip,
     edger_normalize_features
 
 rule all:
@@ -22,6 +23,16 @@ rule all:
             assembly = assemblies.keys()),
         expand("results/{assembly}/{db}.parsed.{norm}.tsv",
             assembly=assemblies.keys(), db=config["annotation_dbs"], norm = config["norm_methods"])
+
+rule zip:
+    input:
+        "{f}.fastq"
+    output:
+        "{f}.fastq.gz"
+    shell:
+        """
+        gzip -c {input} > {output}
+        """
 
 rule bowtie_build:
     input:
