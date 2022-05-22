@@ -88,12 +88,22 @@ def get_sample_counts(samples, db):
     :return:
     """
     d = {}
+    annots_dict = {}
+    index_col = 0
+    if db=="modules":
+        index_col=4
     for sample in samples.keys():
         assembly = samples[sample]["assembly"]
         f = f"results/{assembly}/{db}.parsed.counts.tsv"
-        df = pd.read_csv(f, sep="\t", index_col=0)
+        df = pd.read_csv(f, sep="\t", index_col=index_col)
+        # Extract annotation columns
+        annots = df.loc[:, df.dtypes == object]
+        annots_dict.update(annots.to_dict(orient="index"))
         d[sample] = df.loc[:, sample]
-    return d
+    counts_df = pd.DataFrame(d)
+    counts_df.fillna(0, inplace=True)
+    counts_df = pd.merge(pd.DataFrame(annots_dict).T, counts_df, right_index=True, left_index=True)
+    return counts_df
 
 
 def extract_counts(sm):
@@ -106,10 +116,9 @@ def extract_counts(sm):
     """
     samples = parse_samples(sm.params.sample_list)
     db = sm.wildcards.db
-    d = get_sample_counts(samples, db)
-    df = pd.DataFrame(d)
-    df.fillna(0, inplace=True)
-    df.to_csv(sm.output[0], sep="\t")
+    counts_df = get_sample_counts(samples, db)
+    counts_df.index.name = db
+    counts_df.to_csv(sm.output[0], sep="\t")
 
 
 def main(sm):
