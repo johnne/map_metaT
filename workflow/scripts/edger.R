@@ -19,8 +19,8 @@ print(db)
 # Read the counts
 if (db == "modules") {
     x <- read.delim(input, sep = "\t", header = TRUE)
-    rownames(x) <- x$module
-    x <- subset(x, select=-c(module))
+    rownames(x) <- x$modules
+    x <- subset(x, select=-c(modules))
 } else {
     x <- read.delim(input, row.names = 1, sep = "\t", header = TRUE)
 }
