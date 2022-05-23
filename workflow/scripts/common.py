@@ -78,7 +78,7 @@ def count_features(sm):
     feature_sum.to_csv(sm.output[0], sep="\t")
 
 
-def get_sample_counts(samples, db):
+def get_sample_counts(samples, assemblies, db):
     """
     Sub-function for iterating each sample and looking up the corresponding
     count from its assembly
@@ -94,6 +94,8 @@ def get_sample_counts(samples, db):
         index_col=4
     for sample in samples.keys():
         assembly = samples[sample]["assembly"]
+        if assembly not in assemblies:
+            continue
         f = f"results/{assembly}/{db}.parsed.counts.tsv"
         df = pd.read_csv(f, sep="\t", index_col=index_col)
         # Extract annotation columns
@@ -115,8 +117,9 @@ def extract_counts(sm):
     :return:
     """
     samples = parse_samples(sm.params.sample_list)
+    assemblies = parse_assemblies(sm.params.assembly_list, sm.params.assembly_dir)
     db = sm.wildcards.db
-    counts_df = get_sample_counts(samples, db)
+    counts_df = get_sample_counts(samples, assemblies, db)
     counts_df.index.name = db
     counts_df.to_csv(sm.output[0], sep="\t")
 

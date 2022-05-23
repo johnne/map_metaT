@@ -129,7 +129,9 @@ rule extract_counts:
     output:
         "tables/{db}.parsed.counts.tsv"
     params:
-        sample_list = config["sample_list"]
+        sample_list = config["sample_list"],
+        assembly_list = config["assembly_list"],
+        assembly_dir = config["assembly_dir"]
     script:
         "scripts/common.py"
 
