@@ -2,6 +2,8 @@
 # Please follow the best practices: 
 # https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
 # in particular regarding the standardized folder structure mentioned there. 
+wildcard_constraints:
+    counts = "counts|rpkm"
 
 configfile: "config/config.yml"
 include: "rules/common.smk"
@@ -179,11 +181,11 @@ rule count_features:
     Sums read counts for gene annotation features such as pfam, KOs etc.
     """
     input:
-        abund = "results/{assembly}/counts.tsv",
+        abund = "results/{assembly}/{counts}.tsv",
         annot = expand("{annotation_dir}/{{assembly}}/{{db}}.parsed.tsv",
             annotation_dir = config["annotation_dir"])
     output:
-        "results/{assembly}/{db}.parsed.counts.tsv"
+        "results/{assembly}/{db}.parsed.{counts}.tsv"
     script:
         "scripts/common.py"
 
