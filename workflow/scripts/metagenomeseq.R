@@ -15,11 +15,11 @@ db <- snakemake@wildcards$db
 
 #Read the counts
 if (db == "modules") {
-        x <- read.delim(input, sep = "\t", header = TRUE)
+        x <- read.delim(input, sep = "\t", header = TRUE, check.names = FALSE)
     rownames(x) <- x$modules
         x <- subset(x, select=-c(modules))
 } else {
-        x <- read.delim(input, row.names = 1, sep = "\t", header = TRUE)
+        x <- read.delim(input, row.names = 1, sep = "\t", header = TRUE, check.names = FALSE)
 }
 # Get sample names
 sample_names <- colnames(x)[unlist(lapply(x, is.numeric))]
