@@ -14,20 +14,32 @@ localrules:
     count_features,
     extract_counts,
     css_normalize_features,
+    MTG_MTX_norm,
     rpkm,
     zip,
     edger_normalize_features
 
+def get_collated(config):
+    input = []
+    for db in config["annotation_dbs"]:
+        for norm in config["norm_methods"]:
+            if norm == "mtgnorm":
+                try:
+                    config["norm_models"][db]
+                except KeyError:
+                    continue
+            f = f"tables/{db}.parsed.{norm}.tsv"
+            input.append(f)
+    return f
+
 rule all:
     input:
-        expand("results/{assembly}/count/{sample}.{suff}",
+        featurecounts = expand("results/{assembly}/count/{sample}.{suff}",
             assembly = assemblies.keys(), sample=samples.keys(), suff=["fc.tsv", "fc.tsv.summary"]),
-        expand("results/{assembly}/counts.tsv",
-            assembly = assemblies.keys()),
-        expand("results/{assembly}/{db}.parsed.{norm}.tsv",
+        counts = expand("results/{assembly}/counts.tsv", assembly = assemblies.keys()),
+        normalized = expand("results/{assembly}/{db}.parsed.{norm}.tsv",
             assembly=assemblies.keys(), db=config["annotation_dbs"], norm = config["norm_methods"]),
-        expand("tables/{db}.parsed.{norm}.tsv",
-            db=config["annotation_dbs"], norm = config["norm_methods"])
+        collated = get_collated(config)
 
 rule zip:
     input:
@@ -126,11 +138,14 @@ rule clean_featurecount:
     script: "scripts/common.py"
 
 rule extract_counts:
+    """
+    Extracts counts or metagenome normalized values from each respective assembly
+    """
     input:
-        expand("results/{assembly}/{{db}}.parsed.counts.tsv",
+        expand("results/{assembly}/{{db}}.parsed.{c}.tsv",
             assembly = assemblies.keys())
     output:
-        "tables/{db}.parsed.counts.tsv"
+        "tables/{db}.parsed.{c}.tsv"
     params:
         sample_list = config["sample_list"],
         assembly_list = config["assembly_list"],
