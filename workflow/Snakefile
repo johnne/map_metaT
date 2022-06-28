@@ -143,7 +143,7 @@ rule extract_counts:
     Extracts counts or metagenome normalized values from each respective assembly
     """
     input:
-        expand("results/{assembly}/{{db}}.parsed.{c}.tsv",
+        expand("results/{assembly}/{{db}}.parsed.{{c}}.tsv",
             assembly = assemblies.keys())
     output:
         "tables/{db}.parsed.{c}.tsv"
