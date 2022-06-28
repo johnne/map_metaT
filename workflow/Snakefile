@@ -20,7 +20,7 @@ localrules:
     zip,
     edger_normalize_features
 
-def get_collated(config):
+def get_norms(config, assemblies):
     input = []
     for db in config["annotation_dbs"]:
         for norm in config["norm_methods"]:
@@ -31,16 +31,17 @@ def get_collated(config):
                     continue
             f = f"tables/{db}.parsed.{norm}.tsv"
             input.append(f)
-    return f
+            for assembly in assemblies:
+                f = f"results/{assembly}/{db}.parsed.{norm}.tsv"
+                input.append(f)
+    return input
 
 rule all:
     input:
         featurecounts = expand("results/{assembly}/count/{sample}.{suff}",
             assembly = assemblies.keys(), sample=samples.keys(), suff=["fc.tsv", "fc.tsv.summary"]),
-        counts = expand("results/{assembly}/counts.tsv", assembly = assemblies.keys()),
-        normalized = expand("results/{assembly}/{db}.parsed.{norm}.tsv",
-            assembly=assemblies.keys(), db=config["annotation_dbs"], norm = config["norm_methods"]),
-        collated = get_collated(config)
+        counts = expand("results/{assembly}/{c}.tsv", assembly = assemblies.keys(), c = ["counts", "rpkm"]),
+        normalized = get_norms(config, assemblies.keys())
 
 rule zip:
     input:
