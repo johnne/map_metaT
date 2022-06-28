@@ -124,10 +124,27 @@ def extract_counts(sm):
     counts_df.to_csv(sm.output[0], sep="\t")
 
 
+def MTG_MTX_norm(sm):
+    mtg_df = pd.read_csv(sm.input.mtg, sep="\t", index_col=0)
+    mtx_df = pd.read_csv(sm.input.mtx, sep="\t", index_col=0)
+    common_cols = [col for col in mtg_df.columns if col in mtx_df.columns]
+    info_df = mtx_df.loc[:, mtx_df.dtypes==object]
+    mtx_df = mtx_df.loc[:, common_cols]
+    mtg_df = mtg_df.loc[:, common_cols]
+    norm_models = sm.params.norm_models
+    norm_df = mtg_df.loc[mtg_df.index.intersection(norm_models)]
+    mtx_sum = mtx_df.groupby(level=0).sum()
+    norm_median = norm_df.groupby(level=0).sum().median()
+    mtx_norm = mtx_sum.div(norm_median)
+    mtx_norm = pd.merge(info_df, mtx_norm, left_index=True, right_index=True)
+    mtx_norm.to_csv(sm.output.mtx, sep="\t")
+
+
 def main(sm):
     toolbox = {"clean_featurecount": clean_featurecount,
                "count_features": count_features,
-               "extract_counts": extract_counts}
+               "extract_counts": extract_counts,
+               "MTG_MTX_norm": MTG_MTX_norm}
     toolbox[sm.rule](sm)
 
 
