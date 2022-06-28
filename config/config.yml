@@ -8,8 +8,7 @@ bowtie2:
   settings: "--very-sensitive"
   threads: 10
 annotation_dbs:
-  - "pfam"
-  - "protein-models"
+  - "pfam-hmmsearch"
   - "enzymes"
   - "kos"
   - "modules"
