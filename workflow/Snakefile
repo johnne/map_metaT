@@ -1,7 +1,10 @@
 # Main entrypoint of the workflow. 
 # Please follow the best practices: 
 # https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
-# in particular regarding the standardized folder structure mentioned there. 
+# in particular regarding the standardized folder structure mentioned there.
+
+import os
+
 wildcard_constraints:
     counts = "counts|rpkm",
     c = "counts|mtgnorm|rpkm"
@@ -29,11 +32,16 @@ def get_norms(config, assemblies):
                     config["norm_models"][db]
                 except KeyError:
                     continue
-            f = f"tables/{db}.parsed.{norm}.tsv"
-            input.append(f)
+            existing = 0
             for assembly in assemblies:
                 f = f"results/{assembly}/{db}.parsed.{norm}.tsv"
+                if norm == "mtgnorm" and not os.path.exists(f"{db}.parsed"):
+                    continue
                 input.append(f)
+                existing += 1
+            if existing > 0:
+                table = f"tables/{db}.parsed.{norm}.tsv"
+                input.append(table)
     return input
 
 rule all:
