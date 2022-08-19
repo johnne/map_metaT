@@ -18,7 +18,7 @@ localrules:
     count_features,
     extract_counts,
     css_normalize_features,
-    MTG_MTX_norm,
+    marker_gene_norm,
     rpkm,
     zip,
     edger_normalize_features
