@@ -7,7 +7,7 @@ import os
 
 wildcard_constraints:
     counts = "counts|rpkm",
-    c = "counts|mtgnorm|rpkm"
+    c = "counts|markergene_norm|rpkm"
 
 configfile: "config/config.yml"
 include: "rules/common.smk"
@@ -27,7 +27,7 @@ def get_norms(config, assemblies):
     input = []
     for db in config["annotation_dbs"]:
         for norm in config["norm_methods"]:
-            if norm == "mtgnorm":
+            if norm == "markergene_norm":
                 try:
                     config["norm_models"][db]
                 except KeyError:
@@ -35,7 +35,7 @@ def get_norms(config, assemblies):
             existing = 0
             for assembly in assemblies:
                 f = f"results/{assembly}/{db}.parsed.{norm}.tsv"
-                if norm == "mtgnorm" and not os.path.exists(f"{db}.parsed"):
+                if norm == "markergene_norm" and not os.path.exists(f"{db}.parsed"):
                     continue
                 input.append(f)
                 existing += 1
@@ -214,16 +214,14 @@ rule count_features:
     script:
         "scripts/common.py"
 
-rule MTG_MTX_norm:
+rule marker_gene_norm:
     """
-    Normalize rpkm values from metatranscriptomes with rpkm values from metagenomes
+    Normalize rpkm values with the median abundance of a set of marker genes
     """
     input:
-        mtg = expand("{annotation_dir}/{{assembly}}/{{db}}.parsed.rpkm.tsv",
-            annotation_dir = config["annotation_dir"]),
         mtx = "results/{assembly}/{db}.parsed.rpkm.tsv"
     output:
-        mtx = "results/{assembly}/{db}.parsed.mtgnorm.tsv"
+        mtx = "results/{assembly}/{db}.parsed.markergene_norm.tsv"
     params:
         norm_models = lambda wildcards: config["norm_models"][wildcards.db]
     script:

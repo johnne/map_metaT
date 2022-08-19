@@ -19,7 +19,7 @@ norm_methods:
   - "RLE"
   - "counts"
   - "rpkm"
-  - "mtgnorm"
+  - "markergene_norm"
 # What features/models to use to normalize the metaT abundance by
 norm_models:
   kos:
