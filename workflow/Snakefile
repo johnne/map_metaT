@@ -214,9 +214,9 @@ rule marker_gene_norm:
     Normalize rpkm values with the median abundance of a set of marker genes
     """
     input:
-        mtx = "results/{assembly}/{db}.parsed.rpkm.tsv"
+        "results/{assembly}/{db}.parsed.rpkm.tsv"
     output:
-        mtx = "results/{assembly}/{db}.parsed.markergene_norm.tsv"
+        "results/{assembly}/{db}.parsed.markergene_norm.tsv"
     params:
         norm_models = lambda wildcards: config["norm_models"][wildcards.db]
     script:
