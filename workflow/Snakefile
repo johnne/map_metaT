@@ -32,16 +32,11 @@ def get_norms(config, assemblies):
                     config["norm_models"][db]
                 except KeyError:
                     continue
-            existing = 0
             for assembly in assemblies:
                 f = f"results/{assembly}/{db}.parsed.{norm}.tsv"
-                if norm == "markergene_norm" and not os.path.exists(f"{db}.parsed"):
-                    continue
                 input.append(f)
-                existing += 1
-            if existing > 0:
-                table = f"tables/{db}.parsed.{norm}.tsv"
-                input.append(table)
+            table = f"tables/{db}.parsed.{norm}.tsv"
+            input.append(table)
     return input
 
 rule all:
