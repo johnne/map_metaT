@@ -16,8 +16,8 @@ db <- snakemake@wildcards$db
 #Read the counts
 if (db == "modules") {
         x <- read.delim(input, sep = "\t", header = TRUE, check.names = FALSE)
-    rownames(x) <- x$modules
-        x <- subset(x, select=-c(modules))
+    rownames(x) <- x$module
+        x <- subset(x, select=-c(module))
 } else {
         x <- read.delim(input, row.names = 1, sep = "\t", header = TRUE, check.names = FALSE)
 }
