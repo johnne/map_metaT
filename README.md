@@ -162,4 +162,3 @@ sample_list: "samples.tsv"
 - there is a metagenomic assembly at `data/assemblies/sample1/final_contigs.fa`
 
 then `sample1` will also have values in collated files under `tables/`. For a metatranscriptomic sample, _e.g._ `sample2` listed in `samples.tsv` but without a corresponding metagenomic assembly, counts and normalized values for features in the other existing assemblies will be found under _e.g_ `results/sample1/kos.parsed.rpkm.tsv` _etc._
-- 
