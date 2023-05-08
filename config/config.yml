@@ -6,7 +6,7 @@ featurecounts:
   settings: "-t CDS -g ID -M -Q 10 -B -p"
 bowtie2:
   settings: "--very-sensitive"
-  threads: 10
+  threads: 16
 annotation_dbs:
   - "pfam-hmmsearch"
   - "enzymes"

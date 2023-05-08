@@ -13,14 +13,20 @@ output <- snakemake@output[[1]]
 normalize <- TRUE
 db <- snakemake@wildcards$db
 
-#Read the counts
+# Read the counts
 if (db == "modules") {
-        x <- read.delim(input, sep = "\t", header = TRUE, check.names = FALSE)
-    rownames(x) <- x$module
+    x <- read.delim(input, sep = "\t", header = TRUE, check.names = FALSE)
+    if ( db%in%colnames(x) ) {
+        rownames(x) <- x$modules
+        x <- subset(x, select=-c(modules))
+    } else {
+        rownames(x) <- x$module
         x <- subset(x, select=-c(module))
+    }
 } else {
-        x <- read.delim(input, row.names = 1, sep = "\t", header = TRUE, check.names = FALSE)
+    x <- read.delim(input, row.names = 1, sep = "\t", header = TRUE, check.names = FALSE)
 }
+
 # Get sample names
 sample_names <- colnames(x)[unlist(lapply(x, is.numeric))]
 # Extract row names
