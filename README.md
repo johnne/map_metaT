@@ -146,3 +146,19 @@ assigned read metrics.
 
 All files starting with `pfam.` contain either raw (`pfam.parsed.counts.tsv`) or
 normalized read counts for annotated pfams. 
+
+#### Collated output
+Collated tables of metatranscriptomic counts and normalized values will be output to `tables/`. However, only samples with matching metagenomic assemblies listed in the `assembly_list` file, **and** with a corresponding `final_contigs.fa` under a subdirectory of `assembly_dir` will have values in these files as they only show abundances for features where a metatranscriptomic sample could be linked directly to its metagenomic assembly.
+
+As an example, in a set up where:
+
+- the config file contains:
+```yaml
+assembly_dir: "data/assemblies"
+assembly_list: "assemblies.txt"
+sample_list: "samples.tsv"
+```
+- a metatranscriptomic sample named `sample1` is specified in `samples.tsv`, and
+- there is a metagenomic assembly at `data/assemblies/sample1/final_contigs.fa`
+
+then `sample1` will also have values in collated files under `tables/`. For a metatranscriptomic sample, _e.g._ `sample2` listed in `samples.tsv` but without a corresponding metagenomic assembly, counts and normalized values for features in the other existing assemblies will be found under _e.g_ `results/sample1/kos.parsed.rpkm.tsv` _etc._
